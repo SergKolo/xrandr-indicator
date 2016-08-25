@@ -1,0 +1,158 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+#
+# Author: Serg Kolo , contact: 1047481448@qq.com
+# Date: August 25 , 2016
+# Purpose: appindicator for easy switching between monitor resolutions
+# Tested on: Ubuntu 16.04 LTS
+#
+#
+# Licensed under The MIT License (MIT).
+# See included LICENSE file or the notice below.
+#
+# Copyright © 2016 Sergiy Kolodyazhnyy
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+import gi
+gi.require_version('AppIndicator3', '0.1')
+from gi.repository import GLib as glib
+from gi.repository import AppIndicator3 as appindicator
+from gi.repository import Gtk as gtk
+from collections import OrderedDict
+import subprocess
+import os
+
+
+class XrandrIndicator(object):
+
+    def __init__(self):
+        self.app = appindicator.Indicator.new(
+            'xrandr-indicator', "",
+            appindicator.IndicatorCategory.HARDWARE
+            )
+
+        self.app.set_status(appindicator.IndicatorStatus.ACTIVE)
+
+        self.schema = 'com.canonical.Unity.Launcher'
+        self.key = 'favorites'
+
+        self.make_menu()
+        #self.icon_path = os.path.dirname(os.path.realpath(__file__))
+        #self.app.set_icon(
+        #    os.path.join(self.icon_path, "indicator-icon.png")
+        #    )
+
+    def set_resolution(self,*args):
+        out = args[-2]
+        mode = args[-1]
+        if '*' in args[-1]:
+            mode = args[-1].replace('*','')
+        self.run_cmd(['xrandr','--output',out,'--mode',mode]) 
+        self.make_menu()
+
+    def make_menu(self,*args):
+        """ generates entries in the indicator"""
+        if hasattr(self, 'app_menu'):
+            for item in self.app_menu.get_children():
+                self.app_menu.remove(item)
+
+        self.app_menu = gtk.Menu()
+        separator_added = None
+        monitors_dict = self.get_connected_monitors().items()
+        sorted_monitors = sorted(monitors_dict,reverse=True)
+        for monitor,resolutions in OrderedDict(sorted_monitors).items():
+            self.monitor_entry = gtk.MenuItem(monitor)
+            self.resolutions_menu = gtk.Menu()
+            self.monitor_entry.set_submenu(self.resolutions_menu)
+            for res in resolutions:
+                self.submenu_item = gtk.MenuItem(res)
+                self.submenu_item.connect('activate',self.set_resolution,monitor,res)
+                self.resolutions_menu.append(self.submenu_item)
+                self.submenu_item.show()
+            self.app_menu.append(self.monitor_entry)
+            self.monitor_entry.show()
+                
+        self.update_menu = gtk.MenuItem('Update Menu')
+        self.update_menu.connect('activate',self.make_menu)
+        self.app_menu.append(self.update_menu)
+        self.update_menu.show()
+ 
+        self.quit_app = gtk.MenuItem('Quit')
+        self.quit_app.connect('activate', self.quit)
+        self.app_menu.append(self.quit_app)
+        self.quit_app.show()
+
+        self.app.set_menu(self.app_menu)
+
+
+    def run(self):
+        """ Launches the indicator """
+        try:
+            gtk.main()
+        except KeyboardInterrupt:
+            pass
+
+    def quit(self, data=None):
+        """ closes indicator """
+        gtk.main_quit()
+
+    def run_cmd(self, cmdlist):
+        """ Reusable function for running external commands """
+        new_env = dict(os.environ)
+        new_env['LC_ALL'] = 'C'
+        try:
+            stdout = subprocess.check_output(cmdlist, env=new_env)
+        except subprocess.CalledProcessError:
+            pass
+        else:
+            if stdout:
+                return stdout
+
+
+    def get_connected_monitors(self):
+        """ returns dictionary of currently connected
+            monitors and their resolutions
+        """
+        output = self.run_cmd(['xrandr']).decode().split('\n')
+        found = None
+        monitors = {}
+        for item in output:
+             if ' connected' in item:
+                found = True
+                name = item.split()[0]
+                monitors[name] = []
+             if found and item.startswith(' '):
+                resolution = item.split()[0]
+                if '*' in item:
+                    resolution = resolution + '*' 
+                monitors[name].append(resolution)
+             if ' disconnected ' in item:
+                found = False
+        
+        return monitors
+
+
+def main():
+    """ defines program entry point """
+    indicator = XrandrIndicator()
+    indicator.run()
+
+if __name__ == '__main__':
+    main()
