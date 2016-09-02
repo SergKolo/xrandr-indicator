@@ -54,10 +54,10 @@ class XrandrIndicator(object):
         self.key = 'favorites'
 
         self.make_menu()
-        #self.icon_path = os.path.dirname(os.path.realpath(__file__))
-        #self.app.set_icon(
-        #    os.path.join(self.icon_path, "indicator-icon.png")
-        #    )
+        self.icon_path = os.path.dirname(os.path.realpath(__file__))
+        self.app.set_icon(
+            os.path.join(self.icon_path, "indicator-icon.png")
+            )
 
     def set_resolution(self,*args):
         out = args[-2]
