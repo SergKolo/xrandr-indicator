@@ -39,7 +39,7 @@ from collections import OrderedDict
 import subprocess
 import os
 
-
+# test
 class XrandrIndicator(object):
 
     def __init__(self):
