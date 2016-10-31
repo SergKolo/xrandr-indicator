@@ -1,0 +1,16 @@
+Source: xrandr-indicator
+Section: gnome
+Priority: extra
+Maintainer: Nathan Osman <nathan@quickmediasolutions.com>
+Build-Depends: debhelper (>= 9)
+Standards-Version: 3.9.8
+Homepage: https://github.com/SergKolo/xrandr-indicator
+
+Package: xrandr-indicator
+Architecture: all
+Depends: python3-gi,
+         gir1.2-appindicator3-0.1,
+         ${python:Depends},
+         ${misc:Depends}
+Description: Monitor resolution indicator
+ Indicator for easily switching between monitor resolutions.
