@@ -54,17 +54,22 @@ class XrandrIndicator(object):
         self.key = 'favorites'
 
         self.make_menu()
-        self.icon_path = os.path.dirname(os.path.realpath(__file__))
-        self.app.set_icon(
-            os.path.join(self.icon_path, "indicator-icon.png")
-            )
+
+        # First try the current directory, otherwise /usr/share/pixmaps
+        icon = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)),
+            "xrandr-indicator.png",
+        )
+        if not os.path.exists(icon):
+            icon = '/usr/share/pixmaps/xrandr-indicator.png'
+        self.app.set_icon(icon)
 
     def set_resolution(self,*args):
         out = args[-2]
         mode = args[-1]
         if '*' in args[-1]:
             mode = args[-1].replace('*','')
-        self.run_cmd(['xrandr','--output',out,'--mode',mode]) 
+        self.run_cmd(['xrandr','--output',out,'--mode',mode])
         self.make_menu()
 
     def make_menu(self,*args):
@@ -88,12 +93,12 @@ class XrandrIndicator(object):
                 self.submenu_item.show()
             self.app_menu.append(self.monitor_entry)
             self.monitor_entry.show()
-                
+
         self.update_menu = gtk.MenuItem('Update Menu')
         self.update_menu.connect('activate',self.make_menu)
         self.app_menu.append(self.update_menu)
         self.update_menu.show()
- 
+
         self.quit_app = gtk.MenuItem('Quit')
         self.quit_app.connect('activate', self.quit)
         self.app_menu.append(self.quit_app)
@@ -141,11 +146,11 @@ class XrandrIndicator(object):
              if found and item.startswith(' '):
                 resolution = item.split()[0]
                 if '*' in item:
-                    resolution = resolution + '*' 
+                    resolution = resolution + '*'
                 monitors[name].append(resolution)
              if ' disconnected ' in item:
                 found = False
-        
+
         return monitors
 
 

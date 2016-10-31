@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=0.1
+Name=Monitor Resolution Indicator
+Comment=Indicator for easily switching between monitor resolutions
+Exec=xrandr-indicator
+Type=Application
+Icon=xrandr-indicator.png
