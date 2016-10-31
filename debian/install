@@ -1,0 +1,3 @@
+xrandr-indicator usr/bin/
+xrandr-indicator.desktop usr/share/applications/
+xrandr-indicator.png usr/share/pixmaps
