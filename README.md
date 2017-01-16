@@ -1,2 +1,6 @@
 # xrandr-indicator
-appindicator for easy switching between monitor resolutions
+Indicator for simple xrandr manipulations, such as switching monitor resolution or positioning monitors relative to others
+
+### Ubuntu installation
+
+

@@ -135,6 +135,8 @@ class XrandrIndicator(object):
                 ]
                 self.add_menu_item(*item)
 
+            if len(OrderedDict(sorted_monitors).keys()) == 1: break
+
             item = [monitor_submenu,gtk.MenuItem,
                     None,'Position',
                     None,[None] 
