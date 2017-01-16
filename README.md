@@ -3,4 +3,7 @@ Indicator for simple xrandr manipulations, such as switching monitor resolution 
 
 ### Ubuntu installation
 
-
+    sudo add-apt-repository ppa:1047481448-2/sergkolo
+    sudo apt-get update
+    sudo apt-get install xrandr-indicator
+        
