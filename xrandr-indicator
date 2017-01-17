@@ -135,6 +135,17 @@ class XrandrIndicator(object):
                 ]
                 self.add_menu_item(*item)
 
+
+            rotation_submenu = self.add_submenu(monitor_submenu,'rotate')
+            orientations = ['normal','left','right','inverted']
+            for orientation in orientations:
+                 item = [ rotation_submenu,gtk.MenuItem,
+                          None,orientation,
+                          self.rotate,[monitor,orientation]
+                 ]
+                 self.add_menu_item(*item)
+             
+
             if len(OrderedDict(sorted_monitors).keys()) == 1: break
 
             item = [monitor_submenu,gtk.MenuItem,
@@ -165,6 +176,11 @@ class XrandrIndicator(object):
         self.quit_app.show()
 
         self.app.set_menu(self.app_menu)
+
+    def rotate(self,*args): 
+        monitor = args[-2]
+        orientation = args[-1]
+        subprocess.call(['xrandr','--output',monitor,'--rotate',orientation])
 
     def set_position(self,*args):
         output = args[-3]
